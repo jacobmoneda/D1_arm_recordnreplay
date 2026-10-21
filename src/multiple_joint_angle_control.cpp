@@ -66,8 +66,20 @@ const Pose HIGH_RIGHT = {
     -3.2,
     -19.0};
 
-const double GRIP_OPEN = 49.7; // max open with disabled torque is 70.9, but servos cant go past 49.7
-const double GRIP_CLOSED = -19.0;
+// Swivel wrist values (J4 and J5)
+const double LEFT_J4 = -87.1;
+const double LEFT_J5 = 85.3;
+
+const double MIDDLE_J4 = -2.0;
+const double MIDDLE_J5 = 89.6;
+
+const double RIGHT_J4 = 96.0;
+const double RIGHT_J5 = 95.6;
+
+// Gripper values (J6)
+const double GRIP_OPEN = 49.7;    // max open with disabled torque is 70.9, but servos cant go past 49.7
+const double GRIP_CLOSED = -19.0; // gripper fully closed
+// const double GRIP_HOLD = ;        // gripper closed just enough to hold target
 
 // ---------------------------------------------------------
 // Feedback callback
@@ -333,6 +345,43 @@ void PrintCurrentPose()
     }
 }
 
+void SwivelTo(
+    ChannelPublisher<unitree_arm::msg::dds_::ArmString_> &publisher,
+    const std::string &name,
+    double j4,
+    double j5)
+{
+    Pose target;
+
+    {
+        std::lock_guard<std::mutex> lock(feedback_mutex);
+
+        if (!feedback_received)
+        {
+            std::cout << "Cannot swivel: no joint feedback."
+                      << std::endl;
+            return;
+        }
+
+        // Start from ACTUAL current arm pose.
+        // This preserves:
+        // J0-J3 = arm height/position
+        // J6    = gripper position
+        target = current_pose;
+    }
+
+    // Change only swivel/orientation joints
+    target[4] = j4;
+    target[5] = j5;
+
+    std::cout << "\nSwivelling " << name << "..."
+              << std::endl;
+
+    SendPose(publisher, target);
+
+    WaitForPose(target, 2.0, 10.0);
+}
+
 // ---------------------------------------------------------
 // Main
 // ---------------------------------------------------------
@@ -357,6 +406,9 @@ int main()
     std::cout << "l : LOW_RIGHT\n";
     std::cout << "m : MID_RIGHT\n";
     std::cout << "u : HIGH_RIGHT\n";
+    std::cout << "1 : swivel LEFT\n";
+    std::cout << "2 : swivel MIDDLE\n";
+    std::cout << "3 : swivel RIGHT\n";
     std::cout << "g : toggle gripper\n";
     std::cout << "p : print current joints\n";
     std::cout << "s : hold current position\n";
@@ -387,6 +439,30 @@ int main()
 
         case 'u':
             MoveTo(publisher, "HIGH_RIGHT", HIGH_RIGHT);
+            break;
+
+        case '1':
+            SwivelTo(
+                publisher,
+                "LEFT",
+                LEFT_J4,
+                LEFT_J5);
+            break;
+
+        case '2':
+            SwivelTo(
+                publisher,
+                "MIDDLE",
+                MIDDLE_J4,
+                MIDDLE_J5);
+            break;
+
+        case '3':
+            SwivelTo(
+                publisher,
+                "RIGHT",
+                RIGHT_J4,
+                RIGHT_J5);
             break;
 
         case 'g':
