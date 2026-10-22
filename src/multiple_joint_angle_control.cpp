@@ -31,40 +31,16 @@ int sequence_number = 1;
 // ---------------------------------------------------------
 
 const Pose HOME = {
-    -0.6,
-    -91.0,
-    88.5,
-    -90.5,
-    -2.0,
-    89.6,
-    -19.0};
+    -0.6, -91.0, 88.5, -90.5, -2.0, 89.6, -19.0};
 
-const Pose LOW_RIGHT = {
-    1.3,
-    -91.0,
-    88.4,
-    -89.5,
-    96.0,
-    95.6,
-    -19.0};
+const Pose LOW = {
+    1.3, -91.0, 88.4, -89.5, 96.0, 95.6, -19.0};
 
-const Pose MID_RIGHT = {
-    -0.7,
-    -59.6,
-    35.5,
-    -87.4,
-    93.6,
-    64.9,
-    -19.0};
+const Pose MID = {
+    -0.7, -59.6, 35.5, -87.4, 93.6, 64.9, -19.0};
 
-const Pose HIGH_RIGHT = {
-    -0.7,
-    -5.3,
-    -88.5,
-    -90.8,
-    90.4,
-    -3.2,
-    -19.0};
+const Pose HIGH = {
+    -0.7, -5.3, -88.5, -90.8, 90.4, -3.2, -19.0};
 
 // Swivel wrist values (J4 and J5)
 const double LEFT_J4 = -87.1;
@@ -77,9 +53,9 @@ const double RIGHT_J4 = 96.0;
 const double RIGHT_J5 = 95.6;
 
 // Gripper values (J6)
-const double GRIP_OPEN = 49.7;    // max open with disabled torque is 70.9, but servos cant go past 49.7
+const double GRIP_OPEN = 70;      // max open with disabled torque is 70.9, but servos cant go past 49.8
 const double GRIP_CLOSED = -19.0; // gripper fully closed
-// const double GRIP_HOLD = ;        // gripper closed just enough to hold target
+const double GRIP_HOLD = 25;      // gripper closed just enough to hold target
 
 // ---------------------------------------------------------
 // Feedback callback
@@ -259,10 +235,10 @@ void ToggleGripper(
     double distance_to_open =
         std::abs(current_gripper - GRIP_OPEN);
 
-    double distance_to_closed =
-        std::abs(current_gripper - GRIP_CLOSED);
+    double distance_to_hold =
+        std::abs(current_gripper - GRIP_HOLD);
 
-    if (distance_to_closed < distance_to_open)
+    if (distance_to_hold < distance_to_open)
     {
         // Currently closed -> open
         target[6] = GRIP_OPEN;
@@ -272,7 +248,7 @@ void ToggleGripper(
     else
     {
         // Currently open -> close
-        target[6] = GRIP_CLOSED;
+        target[6] = GRIP_HOLD;
 
         std::cout << "Closing gripper..." << std::endl;
     }
@@ -403,9 +379,9 @@ int main()
     std::cout << "\nD1 POSE CONTROLLER\n";
     std::cout << "==================\n";
     std::cout << "h : HOME\n";
-    std::cout << "l : LOW_RIGHT\n";
-    std::cout << "m : MID_RIGHT\n";
-    std::cout << "u : HIGH_RIGHT\n";
+    std::cout << "l : LOW\n";
+    std::cout << "m : MID\n";
+    std::cout << "u : HIGH\n";
     std::cout << "1 : swivel LEFT\n";
     std::cout << "2 : swivel MIDDLE\n";
     std::cout << "3 : swivel RIGHT\n";
@@ -430,15 +406,15 @@ int main()
             break;
 
         case 'l':
-            MoveTo(publisher, "LOW_RIGHT", LOW_RIGHT);
+            MoveTo(publisher, "LOW", LOW);
             break;
 
         case 'm':
-            MoveTo(publisher, "MID_RIGHT", MID_RIGHT);
+            MoveTo(publisher, "MID", MID);
             break;
 
         case 'u':
-            MoveTo(publisher, "HIGH_RIGHT", HIGH_RIGHT);
+            MoveTo(publisher, "HIGH", HIGH);
             break;
 
         case '1':
@@ -509,6 +485,27 @@ int main()
 
             SetEnable(publisher, false);
             break;
+        case 'd':
+        {
+            for (int sample = 0; sample < 200; ++sample)
+            {
+                {
+                    std::lock_guard<std::mutex> lock(feedback_mutex);
+
+                    std::cout
+                        << current_pose[3] << ","
+                        << current_pose[4] << ","
+                        << current_pose[5] << ","
+                        << current_pose[6]
+                        << std::endl;
+                }
+
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(50));
+            }
+
+            break;
+        }
 
         case 'q':
             std::cout << "Exiting controller." << std::endl;
