@@ -373,13 +373,14 @@ void AutomatedInspectionSequence(
     std::cout << "\nStarting automated inspection sequence..."
               << std::endl;
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // sleep for 5 seconds
     MoveTo(publisher, "HOME", HOME);
     MoveTo(publisher, "LOW", LOW);
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
     MoveTo(publisher, "MID", MID);
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
     MoveTo(publisher, "HIGH", HIGH);
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
     MoveTo(publisher, "HOME", HOME);
 
     std::cout << "\nAutomated inspection sequence complete."
