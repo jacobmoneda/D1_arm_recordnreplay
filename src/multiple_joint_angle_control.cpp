@@ -359,6 +359,29 @@ void SwivelTo(
 }
 
 // ---------------------------------------------------------
+// Automated Inspection Sequence
+// ---------------------------------------------------------
+
+void AutomatedInspectionSequence(
+    ChannelPublisher<unitree_arm::msg::dds_::ArmString_> &publisher)
+{
+    std::cout << "\nStarting automated inspection sequence..."
+              << std::endl;
+
+    MoveTo(publisher, "HOME", HOME);
+    MoveTo(publisher, "LOW", LOW);
+    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    MoveTo(publisher, "MID", MID);
+    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    MoveTo(publisher, "HIGH", HIGH);
+    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); // sleep for 15 seconds
+    MoveTo(publisher, "HOME", HOME);
+
+    std::cout << "\nAutomated inspection sequence complete."
+              << std::endl;
+}
+
+// ---------------------------------------------------------
 // Main
 // ---------------------------------------------------------
 
@@ -378,6 +401,7 @@ int main()
 
     std::cout << "\nD1 POSE CONTROLLER\n";
     std::cout << "==================\n";
+    std::cout << "i : INITIATE INSPECTION SEQUENCE\n";
     std::cout << "h : HOME\n";
     std::cout << "l : LOW\n";
     std::cout << "m : MID\n";
@@ -401,6 +425,10 @@ int main()
 
         switch (command)
         {
+        case 'i':
+            AutomatedInspectionSequence(publisher);
+            break;
+
         case 'h':
             MoveTo(publisher, "HOME", HOME);
             break;
