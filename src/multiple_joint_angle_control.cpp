@@ -364,6 +364,78 @@ void SwivelTo(
 }
 
 // ---------------------------------------------------------
+// Get Timestamp
+// ---------------------------------------------------------
+
+std::string GetTimestamp()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time =
+        std::chrono::system_clock::to_time_t(now);
+
+    std::tm local_time{};
+
+#ifdef _WIN32
+    localtime_s(&local_time, &now_time);
+#else
+    localtime_r(&now_time, &local_time);
+#endif
+
+    std::ostringstream oss;
+
+    oss << std::put_time(
+        &local_time,
+        "%Y-%m-%d %H:%M:%S");
+
+    return oss.str();
+}
+
+// ---------------------------------------------------------
+// Log Pose
+// ---------------------------------------------------------
+
+void LogPose(
+    const std::string &event,
+    const std::string &pose,
+    const std::string &filename = "pose_log.csv")
+{
+    bool file_exists = false;
+
+    {
+        std::ifstream infile(filename);
+        file_exists = infile.good();
+    }
+
+    std::ofstream file(
+        filename,
+        std::ios::app);
+
+    if (!file.is_open())
+    {
+        std::cerr
+            << "Could not open pose log."
+            << std::endl;
+
+        return;
+    }
+
+    if (!file_exists)
+    {
+        file
+            << "timestamp,event,pose"
+            << std::endl;
+    }
+
+    file
+        << GetTimestamp()
+        << ","
+        << event
+        << ","
+        << pose
+        << std::endl;
+}
+
+// ---------------------------------------------------------
 // Automated Inspection Sequence
 // ---------------------------------------------------------
 
@@ -375,12 +447,22 @@ void AutomatedInspectionSequence(
 
     std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // sleep for 5 seconds
     MoveTo(publisher, "HOME", HOME);
+
     MoveTo(publisher, "LOW", LOW);
+    LogPose("START", "LOW");
     std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
+    LogPose("END", "LOW");
+
     MoveTo(publisher, "MID", MID);
+    LogPose("START", "MID");
     std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
+    LogPose("END", "MID");
+
     MoveTo(publisher, "HIGH", HIGH);
+    LogPose("START", "HIGH");
     std::this_thread::sleep_for(std::chrono::milliseconds(20000)); // sleep for 20 seconds
+    LogPose("END", "HIGH");
+
     MoveTo(publisher, "HOME", HOME);
 
     std::cout << "\nAutomated inspection sequence complete."
