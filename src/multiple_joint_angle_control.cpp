@@ -12,6 +12,9 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <fstream>
+#include <iomanip>
+#include <ctime>
 
 #define COMMAND_TOPIC "rt/arm_Command"
 #define FEEDBACK_TOPIC "current_servo_angle"
