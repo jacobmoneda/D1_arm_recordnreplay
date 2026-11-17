@@ -42,9 +42,10 @@ const Pose LOW = {
 const Pose MID = {
     -0.7, -59.6, 35.5, -87.4, 93.6, 64.9, -19.0};
 
-// wrist angled parallel to the ground
-// const Pose HIGH = {
-//    -0.7, -5.3, -88.5, -90.8, 90.4, -3.2, -19.0};
+/* //wrist angled parallel to the ground
+ const Pose HIGH = {
+    -0.7, -5.3, -88.5, -90.8, 90.4, -3.2, -19.0};
+*/
 
 // wrist angled 45 degrees up
 const Pose HIGH = {
